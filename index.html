@@ -209,7 +209,7 @@
             box-shadow: 
                 0 0 20px rgba(0, 242, 255, 0.8),
                 inset 0 0 10px rgba(255, 255, 255, 0.5);
-            transition: transform 0.1s;
+            transition: transform 0.05s ease-out;
             pointer-events: none;
             z-index: 2;
         }
@@ -610,7 +610,7 @@
 
     <div id="mobile-controls">
         <div class="control-group">
-            <div class="joystick-container">
+            <div class="joystick-container" id="joystick-container">
                 <div class="joystick-boundary"></div>
                 <div class="joystick-thumb" id="joystick-thumb"></div>
             </div>
@@ -632,12 +632,12 @@
  */
 const CFG = {
     GRAVITY: 0.15,
-    FRICTION: 0.92, // Augmenté pour un contrôle plus lisse
+    FRICTION: 0.92,
     SPEED: 5,
     PLAYER_SIZE: 45,
     ENEMY_SPEED_MULTIPLIER: 0.7,
-    PROJECTILE_SPEED: 18, // Augmenté
-    FIRE_RATE: 4, // Réduit pour tirer plus vite
+    PROJECTILE_SPEED: 18,
+    FIRE_RATE: 4,
     JOYSTICK_RADIUS: 60,
     COLORS: {
         player: '#00f2ff',
@@ -775,6 +775,19 @@ const Game = {
         this.canvas.height = this.height;
         
         this.isPortrait = this.height > this.width;
+        
+        // Recalculer la position du joystick
+        this.calculateJoystickOrigin();
+    },
+
+    calculateJoystickOrigin() {
+        const joystickContainer = document.querySelector('.joystick-container');
+        if (!joystickContainer) return;
+        
+        const rect = joystickContainer.getBoundingClientRect();
+        this.joystickOrigin.x = rect.left + rect.width / 2;
+        this.joystickOrigin.y = rect.top + rect.height / 2;
+        this.joystickMaxRadius = rect.width / 2 - 35;
     },
 
     setupInput() {
@@ -812,15 +825,12 @@ const Game = {
     },
 
     setupMobileControls() {
-        const joystickContainer = document.querySelector('.joystick-container');
+        const joystickContainer = document.getElementById('joystick-container');
         const fireBtn = document.getElementById('btn-fire');
         
         if (!joystickContainer) return;
         
-        const rect = joystickContainer.getBoundingClientRect();
-        this.joystickOrigin.x = rect.left + rect.width / 2;
-        this.joystickOrigin.y = rect.top + rect.height / 2;
-        this.joystickMaxRadius = rect.width / 2 - 35;
+        this.calculateJoystickOrigin();
         
         const handleJoystickStart = (clientX, clientY, touchId = null) => {
             if (!this.isRunning) return;
@@ -847,27 +857,27 @@ const Game = {
             document.getElementById('joystick-thumb').style.transform = 'translate(-50%, -50%)';
         };
         
-        // Touch events
+        // Touch events - CORRECTION PRINCIPALE
         joystickContainer.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
             handleJoystickStart(touch.clientX, touch.clientY, touch.identifier);
-        });
+        }, { passive: false });
         
-        joystickContainer.addEventListener('touchmove', (e) => {
-            e.preventDefault();
+        // Utiliser document pour capturer tous les mouvements
+        document.addEventListener('touchmove', (e) => {
             if (!this.joystickActive || !this.joystickTouchId) return;
             
             for (let i = 0; i < e.touches.length; i++) {
                 if (e.touches[i].identifier === this.joystickTouchId) {
+                    e.preventDefault();
                     handleJoystickMove(e.touches[i].clientX, e.touches[i].clientY);
                     break;
                 }
             }
         }, { passive: false });
         
-        joystickContainer.addEventListener('touchend', (e) => {
-            e.preventDefault();
+        document.addEventListener('touchend', (e) => {
             for (let i = 0; i < e.changedTouches.length; i++) {
                 if (e.changedTouches[i].identifier === this.joystickTouchId) {
                     handleJoystickEnd(this.joystickTouchId);
@@ -876,12 +886,16 @@ const Game = {
             }
         });
         
-        joystickContainer.addEventListener('touchcancel', (e) => {
-            e.preventDefault();
-            handleJoystickEnd(this.joystickTouchId);
+        document.addEventListener('touchcancel', (e) => {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === this.joystickTouchId) {
+                    handleJoystickEnd(this.joystickTouchId);
+                    break;
+                }
+            }
         });
         
-        // Mouse events
+        // Mouse events pour le desktop
         joystickContainer.addEventListener('mousedown', (e) => {
             e.preventDefault();
             handleJoystickStart(e.clientX, e.clientY);
@@ -894,7 +908,9 @@ const Game = {
         });
         
         document.addEventListener('mouseup', (e) => {
-            handleJoystickEnd();
+            if (this.joystickActive) {
+                handleJoystickEnd();
+            }
         });
         
         // Bouton de tir
@@ -915,7 +931,7 @@ const Game = {
         fireBtn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             handleFireStart();
-        });
+        }, { passive: false });
         
         fireBtn.addEventListener('touchend', (e) => {
             e.preventDefault();
@@ -942,12 +958,12 @@ const Game = {
 
     updateJoystickPosition(clientX, clientY) {
         const joystickThumb = document.getElementById('joystick-thumb');
-        const rect = document.querySelector('.joystick-container').getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
         
-        let deltaX = clientX - centerX;
-        let deltaY = clientY - centerY;
+        // Recalculer l'origine à chaque mise à jour pour gérer le scroll/resize
+        this.calculateJoystickOrigin();
+        
+        let deltaX = clientX - this.joystickOrigin.x;
+        let deltaY = clientY - this.joystickOrigin.y;
         const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
         
         if (distance > this.joystickMaxRadius) {
@@ -957,6 +973,7 @@ const Game = {
         
         joystickThumb.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
         
+        // Normaliser les valeurs entre -1 et 1
         this.joystickX = deltaX / this.joystickMaxRadius;
         this.joystickY = deltaY / this.joystickMaxRadius;
     },
@@ -981,6 +998,7 @@ const Game = {
     },
 
     start() {
+        console.log("Jeu démarre!"); // Debug
         this.level = 1;
         this.score = 0;
         this.lives = 3;
@@ -996,6 +1014,11 @@ const Game = {
         this.cameraX = 0;
         this.cameraY = 0;
         this.lastTime = 0;
+        
+        // Réinitialiser le joystick
+        this.joystickActive = false;
+        this.joystickX = 0;
+        this.joystickY = 0;
         
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
@@ -1140,7 +1163,7 @@ const Game = {
                 x: x,
                 y: y,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
+                vy: Math.sin(angle) * speed,  // CORRECTION ICI : : au lieu de =
                 size: size,
                 life: 1.0,
                 color: '#ff5500',
@@ -1250,6 +1273,12 @@ const Game = {
         
         if (this.fireCooldown > 0) {
             this.fireCooldown -= 1;
+        }
+        
+        // Mise à jour du joystick même si non actif (pour réinitialisation)
+        if (!this.joystickActive) {
+            this.joystickX = 0;
+            this.joystickY = 0;
         }
         
         if ((this.keys['Space'] || this.keys['ShiftLeft']) && this.fireCooldown <= 0 && !this.player.invincible) {
@@ -1497,10 +1526,12 @@ class Player {
         if(Game.keys['ArrowUp'] || Game.keys['KeyW']) this.vy -= CFG.SPEED * 0.15;
         if(Game.keys['ArrowDown'] || Game.keys['KeyS']) this.vy += CFG.SPEED * 0.15;
         
-        // Contrôles joystick
+        // Contrôles joystick - CORRECTION IMPORTANTE
         if (Game.joystickActive) {
-            this.vx += Game.joystickX * CFG.SPEED * 0.25;
-            this.vy += Game.joystickY * CFG.SPEED * 0.25;
+            // Augmenter la sensibilité du joystick
+            const sensitivity = 0.3;
+            this.vx += Game.joystickX * CFG.SPEED * sensitivity;
+            this.vy += Game.joystickY * CFG.SPEED * sensitivity;
         }
         
         this.wingFlap += 0.15;
