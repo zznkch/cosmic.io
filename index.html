@@ -94,7 +94,6 @@
             justify-content: space-between;
             align-items: flex-start;
             padding: 0 15px;
-            padding-right: 70px; /* Espace pour le bouton plein écran */
         }
 
         .score-display {
@@ -163,16 +162,21 @@
             transform: scale(0.95);
         }
 
-        /* Contrôles mobiles - Joystick amélioré */
+        /* Contrôles mobiles - TOUJOURS VISIBLES */
         #mobile-controls {
             position: fixed;
             bottom: max(20px, var(--safe-area-bottom));
             width: 100vw;
-            display: none;
+            display: flex;
             justify-content: space-between;
             padding: 0 20px;
             z-index: 60;
             gap: 20px;
+            pointer-events: none;
+        }
+
+        .control-group {
+            pointer-events: auto;
         }
 
         .joystick-container {
@@ -237,6 +241,7 @@
             align-self: flex-end;
             margin-bottom: 20px;
             position: relative;
+            cursor: pointer;
         }
 
         .action-btn.active {
@@ -310,7 +315,7 @@
             box-shadow: 0 0 5px var(--neon-green);
         }
 
-        /* Orientation détection */
+        /* Orientation détection - MODE PORTRAIT */
         .orientation-warning {
             display: none;
             position: fixed;
@@ -371,10 +376,6 @@
                 height: 25px;
             }
             
-            #mobile-controls {
-                display: flex;
-            }
-
             .joystick-container {
                 width: 120px;
                 height: 120px;
@@ -385,15 +386,24 @@
                 height: 60px;
             }
             
-            /* Ajustement du HUD pour mobile */
-            .hud {
-                padding-right: 60px; /* Moins d'espace sur mobile */
-            }
-            
             .play-triangle {
                 border-left-width: 40px;
                 border-top-width: 25px;
                 border-bottom-width: 25px;
+            }
+            
+            /* Sur mobile, on cache les contrôles si on est en paysage (car on veut portrait) */
+            @media (orientation: landscape) {
+                #mobile-controls {
+                    opacity: 0.7;
+                }
+            }
+            
+            /* Sur mobile portrait, les contrôles sont pleinement visibles */
+            @media (orientation: portrait) {
+                #mobile-controls {
+                    opacity: 1;
+                }
             }
         }
 
@@ -412,15 +422,48 @@
                 border-top-width: 35px;
                 border-bottom-width: 35px;
             }
+            
+            /* Sur desktop, les contrôles sont semi-transparents */
+            #mobile-controls {
+                opacity: 0.4;
+                transition: opacity 0.3s;
+            }
+            
+            #mobile-controls:hover {
+                opacity: 0.8;
+            }
         }
 
-        @media (orientation: portrait) and (max-width: 768px) {
+        /* MODE PORTRAIT OBLIGATOIRE SUR MOBILE */
+        @media (orientation: landscape) and (max-width: 768px) {
             .orientation-warning {
                 display: flex;
             }
             
             #game-container:not(.allow-portrait) {
                 display: none;
+            }
+            
+            #mobile-controls {
+                opacity: 0.3;
+            }
+        }
+
+        @media (orientation: portrait) and (max-width: 768px) {
+            /* En mode portrait, ajuster la taille des contrôles */
+            .joystick-container {
+                width: 140px;
+                height: 140px;
+            }
+            
+            .joystick-thumb {
+                width: 65px;
+                height: 65px;
+            }
+            
+            .action-btn {
+                width: 90px;
+                height: 90px;
             }
         }
 
@@ -433,10 +476,6 @@
                 width: 20px;
                 height: 20px;
             }
-            
-            .hud {
-                padding-right: 50px; /* Moins d'espace sur les écrans très courts */
-            }
         }
 
         /* Support pour écrans très larges (TV) */
@@ -448,7 +487,7 @@
 
         .hidden { display: none !important; }
 
-        /* Animation d'invincibilité - CORRIGÉE */
+        /* Animation d'invincibilité */
         .player-invincible {
             animation: playerBlink 0.3s infinite alternate;
         }
@@ -456,35 +495,6 @@
         @keyframes playerBlink {
             0% { opacity: 0.3; }
             100% { opacity: 1; }
-        }
-
-        /* Mode plein écran - position révisée */
-        .fullscreen-btn {
-            position: fixed;
-            top: max(20px, var(--safe-area-top));
-            right: max(20px, var(--safe-area-right));
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid var(--neon-green);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: var(--neon-green);
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 70;
-            backdrop-filter: blur(5px);
-            z-index: 51;
-        }
-
-        /* Sur mobile, déplacer le bouton en bas si nécessaire */
-        @media (max-width: 768px) and (orientation: landscape) {
-            .fullscreen-btn {
-                top: auto;
-                bottom: max(20px, var(--safe-area-bottom));
-            }
         }
 
         /* Écran Mission Failed */
@@ -542,7 +552,7 @@
 <div class="orientation-warning">
     <div>
         <h2>🔄 Tournez votre appareil</h2>
-        <p>Pour une meilleure expérience de jeu, veuillez utiliser votre appareil en mode paysage.</p>
+        <p>Pour une meilleure expérience de jeu, veuillez utiliser votre appareil en mode portrait.</p>
     </div>
 </div>
 
@@ -570,8 +580,6 @@
             </div>
         </div>
     </div>
-
-    <button class="fullscreen-btn" id="fullscreen-btn" title="Plein écran">⛶</button>
 
     <div id="start-screen" class="overlay">
         <div class="start-content">
@@ -608,6 +616,7 @@
 
     <canvas id="canvas"></canvas>
 
+    <!-- CONTROLES TOUJOURS VISIBLES -->
     <div id="mobile-controls">
         <div class="control-group">
             <div class="joystick-container" id="joystick-container">
@@ -628,17 +637,18 @@
 
 <script>
 /**
- * CONFIGURATION & CONSTANTES - OPTIMISÉES
+ * CONFIGURATION & CONSTANTES - OPTIMISÉES POUR MOBILE PORTRAIT
  */
 const CFG = {
     GRAVITY: 0.15,
     FRICTION: 0.92,
-    SPEED: 5,
-    PLAYER_SIZE: 45,
+    SPEED: 4.5,
+    PLAYER_SIZE: 40,
     ENEMY_SPEED_MULTIPLIER: 0.7,
-    PROJECTILE_SPEED: 18,
+    PROJECTILE_SPEED: 16,
     FIRE_RATE: 4,
-    JOYSTICK_RADIUS: 60,
+    JOYSTICK_RADIUS: 55,
+    JOYSTICK_DEADZONE: 0.1,
     COLORS: {
         player: '#00f2ff',
         enemyCircle: '#ff007a',
@@ -653,7 +663,7 @@ const CFG = {
 };
 
 /**
- * MOTEUR DE JEU - CORRIGÉ
+ * MOTEUR DE JEU - AMÉLIORÉ POUR MOBILE PORTRAIT
  */
 const Game = {
     canvas: document.getElementById('canvas'),
@@ -689,6 +699,7 @@ const Game = {
     explosionParticles: [],
     lastTime: 0,
     deltaTime: 0,
+    touchEvents: [],
 
     init() {
         this.ctx = this.canvas.getContext('2d');
@@ -703,9 +714,6 @@ const Game = {
         window.addEventListener('orientationchange', () => {
             setTimeout(() => this.resize(), 100);
         });
-        
-        // Gestion du plein écran
-        this.setupFullscreen();
         
         // Input Listeners
         this.setupInput();
@@ -741,30 +749,11 @@ const Game = {
         
         // Ajuster les paramètres selon l'appareil
         if (this.isMobile) {
-            CFG.SPEED = 3.5;
-            CFG.PLAYER_SIZE = 40;
+            CFG.SPEED = 4.0;
+            CFG.PLAYER_SIZE = 35;
             CFG.JOYSTICK_RADIUS = 50;
+            CFG.PROJECTILE_SPEED = 14;
         }
-    },
-
-    setupFullscreen() {
-        const fullscreenBtn = document.getElementById('fullscreen-btn');
-        
-        fullscreenBtn.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(err => {
-                    console.log(`Erreur plein écran: ${err.message}`);
-                });
-                fullscreenBtn.innerHTML = '🗕';
-            } else {
-                document.exitFullscreen();
-                fullscreenBtn.innerHTML = '⛶';
-            }
-        });
-
-        document.addEventListener('fullscreenchange', () => {
-            fullscreenBtn.innerHTML = document.fullscreenElement ? '🗕' : '⛶';
-        });
     },
 
     resize() {
@@ -787,7 +776,7 @@ const Game = {
         const rect = joystickContainer.getBoundingClientRect();
         this.joystickOrigin.x = rect.left + rect.width / 2;
         this.joystickOrigin.y = rect.top + rect.height / 2;
-        this.joystickMaxRadius = rect.width / 2 - 35;
+        this.joystickMaxRadius = Math.min(rect.width / 2 - 35, CFG.JOYSTICK_RADIUS);
     },
 
     setupInput() {
@@ -816,9 +805,10 @@ const Game = {
         });
         window.addEventListener('keyup', e => this.keys[e.code] = false);
         
+        // Touch pour démarrer
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            if (!this.isRunning) {
+            if (!this.isRunning && !this.gameOver) {
                 this.start();
             }
         }, { passive: false });
@@ -832,6 +822,7 @@ const Game = {
         
         this.calculateJoystickOrigin();
         
+        // Gestion du joystick améliorée
         const handleJoystickStart = (clientX, clientY, touchId = null) => {
             if (!this.isRunning) return;
             
@@ -857,14 +848,13 @@ const Game = {
             document.getElementById('joystick-thumb').style.transform = 'translate(-50%, -50%)';
         };
         
-        // Touch events - CORRECTION PRINCIPALE
+        // Touch events optimisés pour mobile
         joystickContainer.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
             handleJoystickStart(touch.clientX, touch.clientY, touch.identifier);
         }, { passive: false });
         
-        // Utiliser document pour capturer tous les mouvements
         document.addEventListener('touchmove', (e) => {
             if (!this.joystickActive || !this.joystickTouchId) return;
             
@@ -895,7 +885,7 @@ const Game = {
             }
         });
         
-        // Mouse events pour le desktop
+        // Mouse events pour desktop
         joystickContainer.addEventListener('mousedown', (e) => {
             e.preventDefault();
             handleJoystickStart(e.clientX, e.clientY);
@@ -959,7 +949,7 @@ const Game = {
     updateJoystickPosition(clientX, clientY) {
         const joystickThumb = document.getElementById('joystick-thumb');
         
-        // Recalculer l'origine à chaque mise à jour pour gérer le scroll/resize
+        // Recalculer l'origine à chaque mise à jour
         this.calculateJoystickOrigin();
         
         let deltaX = clientX - this.joystickOrigin.x;
@@ -969,6 +959,12 @@ const Game = {
         if (distance > this.joystickMaxRadius) {
             deltaX = (deltaX / distance) * this.joystickMaxRadius;
             deltaY = (deltaY / distance) * this.joystickMaxRadius;
+        }
+        
+        // Appliquer une zone morte pour éviter les mouvements involontaires
+        if (distance < this.joystickMaxRadius * CFG.JOYSTICK_DEADZONE) {
+            deltaX = 0;
+            deltaY = 0;
         }
         
         joystickThumb.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
@@ -998,7 +994,7 @@ const Game = {
     },
 
     start() {
-        console.log("Jeu démarre!"); // Debug
+        console.log("Jeu démarre!");
         this.level = 1;
         this.score = 0;
         this.lives = 3;
@@ -1019,6 +1015,11 @@ const Game = {
         this.joystickActive = false;
         this.joystickX = 0;
         this.joystickY = 0;
+        const joystickThumb = document.getElementById('joystick-thumb');
+        if (joystickThumb) {
+            joystickThumb.style.transform = 'translate(-50%, -50%)';
+            joystickThumb.classList.remove('active');
+        }
         
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
@@ -1038,11 +1039,11 @@ const Game = {
 
     generateStars() {
         this.stars = [];
-        const starCount = this.isMobile ? 100 : 200;
+        const starCount = this.isMobile ? 150 : 250;
         for (let i = 0; i < starCount; i++) {
             this.stars.push({
                 x: Math.random() * 4000 - 2000,
-                y: Math.random() * 4000 - 2000,
+                y: Math.random() * 6000 - 3000,
                 size: Math.random() * 2 + 0.5,
                 speed: Math.random() * 0.5 + 0.1,
                 opacity: Math.random() * 0.5 + 0.3
@@ -1109,7 +1110,7 @@ const Game = {
         
         const enemyTypes = ['circle', 'triangle', 'square', 'star', 'hexagon', 'spiral', 'drone'];
         const type = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
-        const size = 25 + Math.random() * 15;
+        const size = 20 + Math.random() * 15;
         const x = baseX + cameraOffsetX;
         const y = baseY + cameraOffsetY;
         
@@ -1163,7 +1164,7 @@ const Game = {
                 x: x,
                 y: y,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,  // CORRECTION ICI : : au lieu de =
+                vy: Math.sin(angle) * speed,
                 size: size,
                 life: 1.0,
                 color: '#ff5500',
@@ -1245,7 +1246,8 @@ const Game = {
     },
 
     loop(timestamp) {
-        if (this.isPortrait && this.isMobile) {
+        // Ne pas exécuter le jeu si on est en paysage sur mobile (on veut portrait)
+        if (!this.isPortrait && this.isMobile && window.innerWidth > window.innerHeight) {
             requestAnimationFrame((t) => this.loop(t));
             return;
         }
@@ -1275,17 +1277,19 @@ const Game = {
             this.fireCooldown -= 1;
         }
         
-        // Mise à jour du joystick même si non actif (pour réinitialisation)
+        // Mise à jour du joystick
         if (!this.joystickActive) {
             this.joystickX = 0;
             this.joystickY = 0;
         }
         
+        // Contrôles clavier
         if ((this.keys['Space'] || this.keys['ShiftLeft']) && this.fireCooldown <= 0 && !this.player.invincible) {
             this.player.fire();
             this.fireCooldown = CFG.FIRE_RATE;
         }
         
+        // Génération d'ennemis
         this.spawnTimer++;
         const spawnRate = Math.max(10, 60 - this.level * 3);
         if(this.spawnTimer >= spawnRate) {
@@ -1468,7 +1472,7 @@ const Game = {
 };
 
 /**
- * CLASSES DES OBJETS - CORRIGÉES
+ * CLASSES DES OBJETS - OPTIMISÉES POUR MOBILE
  */
 class Player {
     constructor(x, y) {
@@ -1482,7 +1486,7 @@ class Player {
         this.wingFlap = 0;
         this.autoRotateSpeed = 0.08;
         
-        // Propriétés d'invincibilité CORRIGÉES
+        // Propriétés d'invincibilité
         this.invincible = false;
         this.invincibleTimer = 0;
     }
@@ -1513,8 +1517,9 @@ class Player {
         Game.projectiles.push(proj);
         Game.updateHUD();
         
-        this.vx -= Math.cos(this.angle) * 1.2;
-        this.vy -= Math.sin(this.angle) * 1.2;
+        // Recul
+        this.vx -= Math.cos(this.angle) * 1.0;
+        this.vy -= Math.sin(this.angle) * 1.0;
     }
 
     update() {
@@ -1526,10 +1531,9 @@ class Player {
         if(Game.keys['ArrowUp'] || Game.keys['KeyW']) this.vy -= CFG.SPEED * 0.15;
         if(Game.keys['ArrowDown'] || Game.keys['KeyS']) this.vy += CFG.SPEED * 0.15;
         
-        // Contrôles joystick - CORRECTION IMPORTANTE
+        // Contrôles joystick - SENSIBILITÉ AMÉLIORÉE
         if (Game.joystickActive) {
-            // Augmenter la sensibilité du joystick
-            const sensitivity = 0.3;
+            const sensitivity = 0.35; // Augmenté pour meilleure réponse
             this.vx += Game.joystickX * CFG.SPEED * sensitivity;
             this.vy += Game.joystickY * CFG.SPEED * sensitivity;
         }
@@ -1590,7 +1594,6 @@ class Player {
     }
 
     draw(ctx) {
-        // CORRECTION : Toujours dessiner le vaisseau, l'invincibilité est gérée par CSS
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
