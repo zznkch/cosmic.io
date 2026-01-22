@@ -1259,7 +1259,7 @@ const Game = {
                 x: x,
                 y: y,
                 vx: Math.cos(angle) * speed,
-                vy = Math.sin(angle) * speed,
+                vy: Math.sin(angle) * speed,
                 size: size,
                 life: 1.0,
                 color: '#ff5500',
@@ -1343,12 +1343,8 @@ const Game = {
     },
 
     loop(timestamp) {
-        // Ne pas exécuter le jeu si on est en paysage sur mobile (on veut portrait)
-        if (!this.isPortrait && this.isMobile && window.innerWidth > window.innerHeight) {
-            requestAnimationFrame((t) => this.loop(t));
-            return;
-        }
-        
+        // MODIFICATION: Suppression de la condition qui bloque le jeu en mode paysage
+        // Le jeu sera maintenant jouable en toutes orientations
         this.deltaTime = timestamp - this.lastTime;
         this.lastTime = timestamp;
         
@@ -2145,4 +2141,3 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-
