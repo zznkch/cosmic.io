@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Neon Devil - Shooter Edition</title>
+    <title>Neon Devil</title>
     <style>
         /* ==========================================================================
            VARIABLES & IMPORTATIONS
@@ -194,6 +194,20 @@
             gap: 0.5rem;
         }
 
+        .hud-left {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.25rem;
+        }
+
+        .hud-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+        }
+
         .score-display {
             font-family: var(--font-primary);
             font-size: clamp(1rem, 3vw, 2rem);
@@ -218,6 +232,13 @@
             align-items: center;
         }
 
+        .lives-level-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.25rem;
+        }
+
         .lives-container {
             display: flex;
             gap: 0.375rem;
@@ -231,6 +252,26 @@
                 inset 0 0 1.25rem rgba(0, 242, 255, 0.1);
             min-height: 2.25rem;
             align-items: center;
+        }
+
+        .level-display-hud {
+            font-family: var(--font-primary);
+            font-size: clamp(0.75rem, 2vw, 1rem);
+            font-weight: bold;
+            color: var(--neon-purple);
+            text-shadow: 
+                0 0 0.5rem var(--neon-purple),
+                0 0 1rem rgba(188, 19, 254, 0.5);
+            background: linear-gradient(to right, 
+                rgba(188, 19, 254, 0.3), 
+                rgba(0, 242, 255, 0.3));
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+            border: 0.125rem solid var(--neon-purple);
+            backdrop-filter: blur(0.625rem);
+            box-shadow: 0 0 1rem rgba(188, 19, 254, 0.3);
+            pointer-events: none;
+            white-space: nowrap;
         }
 
         .heart {
@@ -297,7 +338,7 @@
         }
 
         /* ==========================================================================
-           MOBILE CONTROLS
+           MOBILE CONTROLS - MODIFIÉ POUR FORCER LA POSITION
         ========================================================================== */
         #mobile-controls {
             position: fixed;
@@ -308,26 +349,41 @@
             align-items: flex-end;
             padding: 0 0.75rem;
             z-index: 60;
-            gap: 0.5rem;
             pointer-events: none;
         }
 
-        .control-group {
+        /* Groupe flèches - TOUJOURS À GAUCHE */
+        .dpad-control-group {
             pointer-events: auto;
             display: flex;
             flex-direction: column;
+            align-items: flex-start;
+            margin-left: 0;
+            margin-right: auto;
+        }
+
+        /* Groupe tir - TOUJOURS À DROITE */
+        .fire-control-group {
+            pointer-events: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-left: auto;
+            margin-right: 0;
         }
 
         /* ==========================================================================
-           D-PAD CONTROLS
+           D-PAD CONTROLS - ADAPTATIF
         ========================================================================== */
         .dpad-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 0.25rem;
-            width: clamp(6rem, 30vw, 12rem);
-            height: clamp(6rem, 30vw, 12rem);
+            gap: 0.2rem;
+            width: clamp(5rem, 30vw, 12rem);
+            height: clamp(5rem, 30vw, 12rem);
+            max-width: 12rem;
+            max-height: 12rem;
             position: relative;
             touch-action: none;
         }
@@ -337,7 +393,7 @@
             border: 0.125rem solid var(--neon-blue);
             border-radius: 0.5rem;
             color: white;
-            font-size: clamp(1rem, 4vw, 2.5rem);
+            font-size: clamp(0.875rem, 4vw, 2.5rem);
             font-weight: bold;
             display: flex;
             justify-content: center;
@@ -345,12 +401,12 @@
             cursor: pointer;
             transition: all 0.1s;
             box-shadow: 
-                0 0 1.25rem rgba(0, 242, 255, 0.3),
-                inset 0 0 0.9375rem rgba(0, 242, 255, 0.1);
+                0 0 1rem rgba(0, 242, 255, 0.3),
+                inset 0 0 0.75rem rgba(0, 242, 255, 0.1);
             user-select: none;
             -webkit-user-select: none;
-            min-height: 2.5rem;
-            min-width: 2.5rem;
+            min-height: 1.5rem;
+            min-width: 1.5rem;
         }
 
         .dpad-btn:active,
@@ -358,8 +414,8 @@
             background: linear-gradient(135deg, var(--neon-blue), #0080ff);
             transform: scale(0.95);
             box-shadow: 
-                0 0 1.875rem rgba(0, 242, 255, 0.9),
-                inset 0 0 1.25rem rgba(255, 255, 255, 0.3);
+                0 0 1.5rem rgba(0, 242, 255, 0.9),
+                inset 0 0 1rem rgba(255, 255, 255, 0.3);
         }
 
         .dpad-up {
@@ -377,7 +433,7 @@
             grid-row: 2;
             background: rgba(0, 242, 255, 0.1);
             border: 0.125rem solid rgba(0, 242, 255, 0.3);
-            font-size: 0.75rem;
+            font-size: clamp(0.5rem, 1.5vw, 0.8rem);
             color: var(--neon-blue);
             pointer-events: none;
         }
@@ -392,11 +448,12 @@
             grid-row: 3;
         }
 
+        /* BOUTON DE TIR - ADAPTATIF */
         .action-btn {
-            width: clamp(4rem, 25vw, 7.5rem);
-            height: clamp(4rem, 25vw, 7.5rem);
-            min-height: 3.75rem;
-            min-width: 3.75rem;
+            width: clamp(4rem, 25vw, 9rem);
+            height: clamp(4rem, 25vw, 9rem);
+            max-width: 9rem;
+            max-height: 9rem;
             background: radial-gradient(circle at 30% 30%, 
                 rgba(255, 0, 122, 0.8), 
                 rgba(188, 19, 254, 0.6));
@@ -407,11 +464,10 @@
             align-items: center;
             color: white;
             box-shadow: 
-                0 0 1.875rem rgba(255, 0, 122, 0.6),
-                0 0 3.75rem rgba(255, 0, 122, 0.3),
-                inset 0 0 1.25rem rgba(255, 255, 255, 0.3);
+                0 0 1.5rem rgba(255, 0, 122, 0.6),
+                0 0 3rem rgba(255, 0, 122, 0.3),
+                inset 0 0 1rem rgba(255, 255, 255, 0.3);
             transition: all 0.1s;
-            margin-bottom: 1rem;
             position: relative;
             cursor: pointer;
             animation: fireBtnGlow 2s infinite alternate;
@@ -482,31 +538,8 @@
         }
 
         /* ==========================================================================
-           LEVEL & COMBO DISPLAYS
+           COMBO DISPLAY
         ========================================================================== */
-        .level-display {
-            position: fixed;
-            bottom: max(1rem, var(--safe-area-bottom));
-            left: 50%;
-            transform: translateX(-50%);
-            background: linear-gradient(to right, 
-                rgba(188, 19, 254, 0.3), 
-                rgba(0, 242, 255, 0.3));
-            padding: 0.375rem 0.75rem;
-            border-radius: 0.75rem;
-            border: 0.125rem solid var(--neon-purple);
-            backdrop-filter: blur(0.625rem);
-            box-shadow: 0 0 1.25rem rgba(188, 19, 254, 0.3);
-            pointer-events: none;
-            z-index: 40;
-            font-family: var(--font-primary);
-            font-weight: bold;
-            color: white;
-            text-shadow: 0 0 0.625rem var(--neon-purple);
-            font-size: clamp(0.75rem, 1.5vw, 1rem);
-            white-space: nowrap;
-        }
-
         .combo-display {
             position: fixed;
             top: 50%;
@@ -606,9 +639,9 @@
                 rgba(188, 19, 254, 0.8));
             transform: scale(0.95);
             box-shadow: 
-                0 0 2.5rem rgba(255, 0, 122, 0.9),
-                0 0 5rem rgba(255, 0, 122, 0.5),
-                inset 0 0 1.5625rem rgba(255, 255, 255, 0.4);
+                0 0 2rem rgba(255, 0, 122, 0.9),
+                0 0 4rem rgba(255, 0, 122, 0.5),
+                inset 0 0 1.25rem rgba(255, 255, 255, 0.4);
         }
 
         .combo-display.active {
@@ -639,8 +672,8 @@
         }
 
         @keyframes fireBtnGlow {
-            0% { box-shadow: 0 0 1.875rem rgba(255, 0, 122, 0.6), 0 0 3.75rem rgba(255, 0, 122, 0.3); }
-            100% { box-shadow: 0 0 2.5rem rgba(188, 19, 254, 0.7), 0 0 5rem rgba(188, 19, 254, 0.4); }
+            0% { box-shadow: 0 0 1.5rem rgba(255, 0, 122, 0.6), 0 0 3rem rgba(255, 0, 122, 0.3); }
+            100% { box-shadow: 0 0 2rem rgba(188, 19, 254, 0.7), 0 0 4rem rgba(188, 19, 254, 0.4); }
         }
 
         @keyframes titleGlow {
@@ -709,28 +742,31 @@
                 gap: 0.5rem;
             }
 
+            .level-display-hud {
+                font-size: clamp(0.875rem, 2vw, 1.125rem);
+                padding: 0.375rem 0.75rem;
+            }
+
             .dpad-container {
-                width: clamp(7rem, 25vw, 11rem);
-                height: clamp(7rem, 25vw, 11rem);
-                gap: 0.375rem;
+                width: clamp(7rem, 25vw, 10rem);
+                height: clamp(7rem, 25vw, 10rem);
+                gap: 0.3rem;
             }
 
             .dpad-btn {
-                min-height: 2.75rem;
-                min-width: 2.75rem;
+                min-height: 1.75rem;
+                min-width: 1.75rem;
                 font-size: clamp(1.25rem, 4vw, 2rem);
             }
 
             .action-btn {
-                width: clamp(5rem, 15vw, 6.25rem);
-                height: clamp(5rem, 15vw, 6.25rem);
-                margin-bottom: 1.5rem;
+                width: clamp(5rem, 20vw, 7rem);
+                height: clamp(5rem, 20vw, 7rem);
             }
 
             #mobile-controls {
                 padding: 0 1.5rem;
                 bottom: max(1.5rem, var(--safe-area-bottom));
-                gap: 1rem;
             }
 
             .controls-info {
@@ -756,11 +792,6 @@
 
             .play-btn {
                 margin: 2rem auto;
-            }
-
-            .level-display {
-                bottom: max(1.5rem, var(--safe-area-bottom));
-                padding: 0.5rem 1rem;
             }
 
             .combo-display {
@@ -792,21 +823,25 @@
                 gap: 0.625rem;
             }
 
+            .level-display-hud {
+                font-size: 1rem;
+                padding: 0.5rem 1rem;
+            }
+
             .dpad-container {
                 width: 9rem;
                 height: 9rem;
             }
 
             .dpad-btn {
-                min-height: 3rem;
-                min-width: 3rem;
+                min-height: 2rem;
+                min-width: 2rem;
                 font-size: 1.75rem;
             }
 
             .action-btn {
-                width: 6rem;
-                height: 6rem;
-                margin-bottom: 2rem;
+                width: 7rem;
+                height: 7rem;
             }
 
             #mobile-controls {
@@ -852,6 +887,11 @@
                 height: 10rem;
             }
 
+            .action-btn {
+                width: 8rem;
+                height: 8rem;
+            }
+
             .play-btn {
                 width: 7rem;
                 height: 7rem;
@@ -873,17 +913,23 @@
             }
             
             .score-display {
-                font-size: 1rem;
+                font-size: 0.875rem;
                 padding: 0.25rem 0.5rem;
             }
             
             .heart {
-                width: 1rem;
-                height: 1rem;
+                width: 0.875rem;
+                height: 0.875rem;
             }
             
             .lives-container {
                 padding: 0.25rem 0.5rem;
+                gap: 0.25rem;
+            }
+            
+            .level-display-hud {
+                font-size: 0.625rem;
+                padding: 0.125rem 0.375rem;
             }
             
             #mobile-controls {
@@ -896,24 +942,16 @@
             }
 
             .dpad-btn {
-                font-size: 0.875rem;
-                min-height: 1.5rem;
-                min-width: 1.5rem;
+                font-size: 0.75rem;
+                min-height: 1rem;
+                min-width: 1rem;
                 border-width: 0.125rem;
             }
             
             .action-btn {
                 width: 4rem;
                 height: 4rem;
-                margin-bottom: 0.5rem;
-                min-height: 3rem;
-                min-width: 3rem;
-            }
-
-            .level-display {
-                bottom: max(0.5rem, var(--safe-area-bottom));
-                font-size: 0.75rem;
-                padding: 0.25rem 0.5rem;
+                border-width: 0.125rem;
             }
 
             .start-content,
@@ -987,10 +1025,19 @@
                 gap: 0.25rem;
             }
             
-            .score-display,
-            .lives-container {
+            .hud-left, .hud-right {
+                width: 100%;
+                align-items: center;
+            }
+            
+            .score-display {
                 width: 100%;
                 justify-content: center;
+            }
+            
+            .lives-level-container {
+                width: 100%;
+                align-items: center;
             }
             
             .controls-info {
@@ -1003,23 +1050,24 @@
             }
             
             #mobile-controls {
-                flex-direction: column;
-                align-items: center;
-                gap: 0.5rem;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-end;
             }
             
-            .control-group {
-                width: 100%;
-                align-items: center;
+            .dpad-control-group,
+            .fire-control-group {
+                width: auto;
             }
             
             .dpad-container {
-                width: 100%;
-                max-width: 10rem;
+                width: 5rem;
+                height: 5rem;
             }
             
             .action-btn {
-                margin-bottom: 0;
+                width: 4rem;
+                height: 4rem;
             }
         }
 
@@ -1120,30 +1168,36 @@
 
 <div id="game-container">
     <div class="hud">
-        <div class="score-display" id="score-display">0</div>
-        <div class="lives-container" id="lives-container">
-            <div class="heart" id="heart-1">
-                <svg viewBox="0 0 32 29.6">
-                    <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
-                    c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
-                </svg>
-            </div>
-            <div class="heart" id="heart-2">
-                <svg viewBox="0 0 32 29.6">
-                    <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
-                    c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
-                </svg>
-            </div>
-            <div class="heart" id="heart-3">
-                <svg viewBox="0 0 32 29.6">
-                    <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
-                    c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
-                </svg>
+        <div class="hud-left">
+            <div class="score-display" id="score-display">0</div>
+        </div>
+        <div class="hud-right">
+            <div class="lives-level-container">
+                <div class="lives-container" id="lives-container">
+                    <div class="heart" id="heart-1">
+                        <svg viewBox="0 0 32 29.6">
+                            <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+                            c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+                        </svg>
+                    </div>
+                    <div class="heart" id="heart-2">
+                        <svg viewBox="0 0 32 29.6">
+                            <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+                            c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+                        </svg>
+                    </div>
+                    <div class="heart" id="heart-3">
+                        <svg viewBox="0 0 32 29.6">
+                            <path d="M23.6,0c-3.4,0-6.3,2.7-7.6,5.6C14.7,2.7,11.8,0,8.4,0C3.8,0,0,3.8,0,8.4c0,9.4,9.5,11.9,16,21.2
+                            c6.1-9.3,16-12.1,16-21.2C32,3.8,28.2,0,23.6,0z"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="level-display-hud" id="level-display-hud">LEVEL 1</div>
             </div>
         </div>
     </div>
 
-    <div class="level-display" id="level-display">LEVEL 1</div>
     <div class="combo-display" id="combo-display">COMBO x0</div>
 
     <div id="start-screen" class="overlay">
@@ -1228,17 +1282,18 @@
 
     <canvas id="canvas"></canvas>
 
-    <!-- CONTROLES TOUJOURS VISIBLES -->
+    <!-- CONTROLES TOUJOURS VISIBLES - POSITION FORCÉE -->
     <div id="mobile-controls">
-        <div class="control-group">
+        <div class="dpad-control-group">
             <div class="dpad-container" id="dpad-container">
                 <div class="dpad-btn dpad-up" data-direction="up">⬆</div>
                 <div class="dpad-btn dpad-left" data-direction="left">⬅</div>
+                <div class="dpad-btn dpad-center">MOVE</div>
                 <div class="dpad-btn dpad-right" data-direction="right">➡</div>
                 <div class="dpad-btn dpad-down" data-direction="down">⬇</div>
             </div>
         </div>
-        <div class="control-group">
+        <div class="fire-control-group">
             <div class="action-btn" id="btn-fire">
                 <div class="target-icon">
                     <div class="target-cross"></div>
@@ -1417,6 +1472,10 @@ const Game = {
         document.getElementById('best-score').textContent = this.bestScore;
     },
 
+    updateLevelDisplayHUD() {
+        document.getElementById('level-display-hud').textContent = `LEVEL ${this.level}`;
+    },
+
     detectDevice() {
         this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
@@ -1497,6 +1556,7 @@ const Game = {
         // Configurer les événements pour chaque bouton directionnel
         dpadButtons.forEach(btn => {
             const direction = btn.dataset.direction;
+            if (!direction) return; // Skip le bouton center
             
             // Touch events
             btn.addEventListener('touchstart', (e) => {
@@ -1635,7 +1695,7 @@ const Game = {
         this.player = new Player(0, 0);
         this.spawnTimer = 0;
         this.updateHUD();
-        this.updateLevelDisplay();
+        this.updateLevelDisplayHUD();
         this.updateComboDisplay();
         
         this.updateHearts();
@@ -1767,10 +1827,6 @@ const Game = {
         document.getElementById('score-display').textContent = this.score;
     },
 
-    updateLevelDisplay() {
-        document.getElementById('level-display').textContent = `LEVEL ${this.level}`;
-    },
-
     updateComboDisplay() {
         const comboDisplay = document.getElementById('combo-display');
         comboDisplay.textContent = `COMBO x${this.combo}`;
@@ -1898,6 +1954,7 @@ const Game = {
         
         this.lives--;
         this.updateHearts();
+        this.updateLevelDisplayHUD();
         
         if (this.lives > 0) {
             this.spawnExplosion(this.player.x, this.player.y, CFG.COLORS.enemyCircle);
@@ -2098,7 +2155,7 @@ const Game = {
         // Augmenter le niveau
         if(this.score >= this.level * 1500) {
             this.level++;
-            this.updateLevelDisplay();
+            this.updateLevelDisplayHUD();
             this.screenShake(5, 200);
             
             // Créer un effet de niveau up
