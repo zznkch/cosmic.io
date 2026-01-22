@@ -549,6 +549,12 @@
 </head>
 <body>
 
+<!-- Élément audio pour la musique de fond -->
+<audio id="background-music" loop>
+    <source src="mixkit-sci-fi-395.mp3" type="audio/mpeg">
+    Votre navigateur ne supporte pas l'élément audio.
+</audio>
+
 <div class="orientation-warning">
     <div>
         <h2>🔄 Tournez votre appareil</h2>
@@ -738,11 +744,16 @@ const Game = {
     lastTime: 0,
     deltaTime: 0,
     touchEvents: [],
+    backgroundMusic: null,
+    musicStarted: false,
 
     init() {
         this.ctx = this.canvas.getContext('2d');
         this.detectDevice();
         this.resize();
+        
+        // Initialiser la musique de fond
+        this.initBackgroundMusic();
         
         // Charger le meilleur score
         this.loadBestScore();
@@ -762,6 +773,37 @@ const Game = {
         document.getElementById('play-triangle-btn').focus();
         
         this.loop(0);
+    },
+
+    initBackgroundMusic() {
+        this.backgroundMusic = document.getElementById('background-music');
+        this.backgroundMusic.volume = 0.5; // Volume à 50% (ajustable)
+        this.backgroundMusic.loop = true;
+        
+        // Démarrer la musique automatiquement
+        this.startBackgroundMusic();
+    },
+
+    startBackgroundMusic() {
+        if (!this.musicStarted) {
+            // Les navigateurs modernes nécessitent une interaction utilisateur pour démarrer l'audio
+            // On démarre la musique au premier clic ou interaction
+            const startMusic = () => {
+                if (!this.musicStarted) {
+                    this.backgroundMusic.play().catch(e => {
+                        console.log("Lecture audio bloquée par le navigateur, attente d'interaction utilisateur");
+                    });
+                    this.musicStarted = true;
+                }
+                // Supprimer les écouteurs après la première interaction
+                document.removeEventListener('click', startMusic);
+                document.removeEventListener('touchstart', startMusic);
+            };
+            
+            // Ajouter des écouteurs pour démarrer la musique à la première interaction
+            document.addEventListener('click', startMusic);
+            document.addEventListener('touchstart', startMusic);
+        }
     },
 
     loadBestScore() {
@@ -1079,6 +1121,14 @@ const Game = {
         // Nettoyer les classes d'invincibilité
         this.canvas.classList.remove('player-invincible');
         
+        // Démarrer la musique si ce n'est pas déjà fait
+        if (!this.musicStarted) {
+            this.backgroundMusic.play().catch(e => {
+                console.log("Lecture audio bloquée");
+            });
+            this.musicStarted = true;
+        }
+        
         this.canvas.focus();
     },
 
@@ -1209,7 +1259,7 @@ const Game = {
                 x: x,
                 y: y,
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
+                vy = Math.sin(angle) * speed,
                 size: size,
                 life: 1.0,
                 color: '#ff5500',
