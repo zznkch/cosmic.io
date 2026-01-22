@@ -312,47 +312,77 @@
             flex-direction: column;
         }
 
-        .joystick-container {
+        /* ==========================================================================
+           D-PAD CONTROLS (REPLACING JOYSTICK)
+        ========================================================================== */
+        .dpad-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 0.5rem;
+            width: clamp(8rem, 30vw, 12rem);
+            height: clamp(8rem, 30vw, 12rem);
             position: relative;
-            width: clamp(7.5rem, 30vw, 11.25rem);
-            height: clamp(7.5rem, 30vw, 11.25rem);
             touch-action: none;
         }
 
-        .joystick-boundary {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, 
-                rgba(0, 242, 255, 0.1), 
-                rgba(0, 100, 200, 0.05));
+        .dpad-btn {
+            background: linear-gradient(135deg, rgba(0, 242, 255, 0.2), rgba(0, 100, 200, 0.1));
             border: 0.1875rem solid var(--neon-blue);
-            border-radius: 50%;
+            border-radius: 0.75rem;
+            color: white;
+            font-size: clamp(1.5rem, 6vw, 2.5rem);
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.1s;
             box-shadow: 
-                0 0 1.875rem rgba(0, 242, 255, 0.4),
-                inset 0 0 1.875rem rgba(0, 242, 255, 0.2);
-            backdrop-filter: blur(0.625rem);
+                0 0 1.25rem rgba(0, 242, 255, 0.3),
+                inset 0 0 0.9375rem rgba(0, 242, 255, 0.1);
+            user-select: none;
+            -webkit-user-select: none;
+            min-height: 3.5rem;
+        }
+
+        .dpad-btn:active,
+        .dpad-btn.active {
+            background: linear-gradient(135deg, var(--neon-blue), #0080ff);
+            transform: scale(0.95);
+            box-shadow: 
+                0 0 1.875rem rgba(0, 242, 255, 0.9),
+                inset 0 0 1.25rem rgba(255, 255, 255, 0.3);
+        }
+
+        .dpad-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .dpad-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .dpad-center {
+            grid-column: 2;
+            grid-row: 2;
+            background: rgba(0, 242, 255, 0.1);
+            border: 0.125rem solid rgba(0, 242, 255, 0.3);
+            font-size: 1rem;
+            color: var(--neon-blue);
             pointer-events: none;
         }
 
-        .joystick-thumb {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: clamp(3rem, 12vw, 5rem);
-            height: clamp(3rem, 12vw, 5rem);
-            background: radial-gradient(circle at 30% 30%, 
-                var(--neon-blue), 
-                #0080ff);
-            border: 0.1875rem solid white;
-            border-radius: 50%;
-            box-shadow: 
-                0 0 1.875rem rgba(0, 242, 255, 0.9),
-                inset 0 0 0.9375rem rgba(255, 255, 255, 0.8);
-            transition: all 0.1s ease-out;
-            pointer-events: none;
-            z-index: 2;
+        .dpad-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .dpad-down {
+            grid-column: 2;
+            grid-row: 3;
         }
 
         .action-btn {
@@ -562,13 +592,6 @@
             animation: heartPulse 0.5s ease-in-out;
         }
 
-        .joystick-thumb.active {
-            box-shadow: 
-                0 0 2.5rem rgba(0, 242, 255, 1),
-                inset 0 0 1.25rem rgba(255, 255, 255, 1);
-            transform: translate(-50%, -50%) scale(1.1);
-        }
-
         .action-btn.active {
             background: radial-gradient(circle at 30% 30%, 
                 rgba(255, 0, 122, 1), 
@@ -671,14 +694,13 @@
                 height: clamp(1.75rem, 3vw, 2rem);
             }
 
-            .joystick-container {
-                width: clamp(8.75rem, 25vw, 10rem);
-                height: clamp(8.75rem, 25vw, 10rem);
+            .dpad-container {
+                width: clamp(9rem, 25vw, 11rem);
+                height: clamp(9rem, 25vw, 11rem);
             }
 
-            .joystick-thumb {
-                width: clamp(3.5rem, 10vw, 4rem);
-                height: clamp(3.5rem, 10vw, 4rem);
+            .dpad-btn {
+                min-height: 3rem;
             }
 
             .action-btn {
@@ -723,14 +745,9 @@
                 height: 2.1875rem;
             }
 
-            .joystick-container {
-                width: 11.25rem;
-                height: 11.25rem;
-            }
-
-            .joystick-thumb {
-                width: 5rem;
-                height: 5rem;
+            .dpad-container {
+                width: 11rem;
+                height: 11rem;
             }
 
             .action-btn {
@@ -776,14 +793,9 @@
                 height: 2.5rem;
             }
 
-            .joystick-container {
-                width: 12.5rem;
-                height: 12.5rem;
-            }
-
-            .joystick-thumb {
-                width: 5.625rem;
-                height: 5.625rem;
+            .dpad-container {
+                width: 12rem;
+                height: 12rem;
             }
 
             .play-btn {
@@ -820,14 +832,15 @@
                 bottom: max(0.9375rem, var(--safe-area-bottom));
             }
             
-            .joystick-container {
-                width: 7.5rem;
-                height: 7.5rem;
+            .dpad-container {
+                width: 7rem;
+                height: 7rem;
             }
 
-            .joystick-thumb {
-                width: 3.125rem;
-                height: 3.125rem;
+            .dpad-btn {
+                font-size: 1.2rem;
+                min-height: 2rem;
+                border-width: 0.125rem;
             }
             
             .action-btn {
@@ -1002,8 +1015,8 @@
             <p>Survive dans l'arène néon. Éliminez les vagues d'ennemis. Devenez une légende.</p>
             <div class="controls-info">
                 <div class="control-item">
-                    <div class="control-icon">🕹️</div>
-                    <div class="control-text">Joystick pour se déplacer</div>
+                    <div class="control-icon">⬆️⬇️⬅️➡️</div>
+                    <div class="control-text">Flèches pour se déplacer</div>
                 </div>
                 <div class="control-item">
                     <div class="control-icon">🎯</div>
@@ -1081,9 +1094,12 @@
     <!-- CONTROLES TOUJOURS VISIBLES -->
     <div id="mobile-controls">
         <div class="control-group">
-            <div class="joystick-container" id="joystick-container">
-                <div class="joystick-boundary"></div>
-                <div class="joystick-thumb" id="joystick-thumb"></div>
+            <div class="dpad-container" id="dpad-container">
+                <div class="dpad-btn dpad-up" data-direction="up">⬆</div>
+                <div class="dpad-btn dpad-left" data-direction="left">⬅</div>
+                <div class="dpad-center">MOVE</div>
+                <div class="dpad-btn dpad-right" data-direction="right">➡</div>
+                <div class="dpad-btn dpad-down" data-direction="down">⬇</div>
             </div>
         </div>
         <div class="control-group">
@@ -1109,8 +1125,6 @@ const CFG = {
     ENEMY_SPEED_MULTIPLIER: 0.8,
     PROJECTILE_SPEED: 18,
     FIRE_RATE: 3,
-    JOYSTICK_RADIUS: 70,
-    JOYSTICK_DEADZONE: 0.08,
     WORLD_WIDTH: 4000,
     WORLD_HEIGHT: 2000,
     COLORS: {
@@ -1161,12 +1175,6 @@ const Game = {
     shotsFired: 0,
     fireCooldown: 0,
     isMobile: false,
-    joystickActive: false,
-    joystickX: 0,
-    joystickY: 0,
-    joystickOrigin: {x: 0, y: 0},
-    joystickMaxRadius: CFG.JOYSTICK_RADIUS,
-    joystickTouchId: null,
     bestScore: 0,
     gameOver: false,
     explosionParticles: [],
@@ -1181,6 +1189,14 @@ const Game = {
     shakeIntensity: 0,
     shakeDuration: 0,
     backgroundMusic: null,
+    
+    // États des touches directionnelles
+    dpadState: {
+        up: false,
+        down: false,
+        left: false,
+        right: false
+    },
 
     init() {
         this.ctx = this.canvas.getContext('2d');
@@ -1272,7 +1288,6 @@ const Game = {
         if (this.isMobile) {
             CFG.SPEED = 4.5;
             CFG.PLAYER_SIZE = 40;
-            CFG.JOYSTICK_RADIUS = 60;
             CFG.PROJECTILE_SPEED = 16;
             CFG.PARTICLE_COUNT.stars = 300;
         }
@@ -1284,19 +1299,6 @@ const Game = {
         
         this.canvas.width = this.width;
         this.canvas.height = this.height;
-        
-        // Recalculer la position du joystick
-        this.calculateJoystickOrigin();
-    },
-
-    calculateJoystickOrigin() {
-        const joystickContainer = document.querySelector('.joystick-container');
-        if (!joystickContainer) return;
-        
-        const rect = joystickContainer.getBoundingClientRect();
-        this.joystickOrigin.x = rect.left + rect.width / 2;
-        this.joystickOrigin.y = rect.top + rect.height / 2;
-        this.joystickMaxRadius = Math.min(rect.width / 2 - 40, CFG.JOYSTICK_RADIUS);
     },
 
     setupInput() {
@@ -1335,92 +1337,63 @@ const Game = {
     },
 
     setupMobileControls() {
-        const joystickContainer = document.getElementById('joystick-container');
+        const dpadButtons = document.querySelectorAll('.dpad-btn');
         const fireBtn = document.getElementById('btn-fire');
         
-        if (!joystickContainer) return;
-        
-        this.calculateJoystickOrigin();
-        
-        // Gestion du joystick améliorée
-        const handleJoystickStart = (clientX, clientY, touchId = null) => {
+        // Gestion des boutons directionnels
+        const handleDpadStart = (direction) => {
             if (!this.isRunning) return;
+            this.dpadState[direction] = true;
             
-            this.joystickActive = true;
-            if (touchId !== null) this.joystickTouchId = touchId;
-            document.getElementById('joystick-thumb').classList.add('active');
-            this.updateJoystickPosition(clientX, clientY);
+            // Ajouter la classe active pour l'effet visuel
+            const btn = document.querySelector(`.dpad-btn[data-direction="${direction}"]`);
+            if (btn) btn.classList.add('active');
         };
         
-        const handleJoystickMove = (clientX, clientY) => {
-            if (!this.joystickActive || !this.isRunning) return;
-            this.updateJoystickPosition(clientX, clientY);
+        const handleDpadEnd = (direction) => {
+            this.dpadState[direction] = false;
+            
+            // Retirer la classe active pour l'effet visuel
+            const btn = document.querySelector(`.dpad-btn[data-direction="${direction}"]`);
+            if (btn) btn.classList.remove('active');
         };
         
-        const handleJoystickEnd = (touchId = null) => {
-            if (touchId !== null && this.joystickTouchId !== touchId) return;
+        // Configurer les événements pour chaque bouton directionnel
+        dpadButtons.forEach(btn => {
+            const direction = btn.dataset.direction;
             
-            this.joystickActive = false;
-            this.joystickX = 0;
-            this.joystickY = 0;
-            this.joystickTouchId = null;
-            document.getElementById('joystick-thumb').classList.remove('active');
-            document.getElementById('joystick-thumb').style.transform = 'translate(-50%, -50%)';
-        };
-        
-        // Touch events optimisés pour mobile
-        joystickContainer.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            handleJoystickStart(touch.clientX, touch.clientY, touch.identifier);
-        }, { passive: false });
-        
-        document.addEventListener('touchmove', (e) => {
-            if (!this.joystickActive || !this.joystickTouchId) return;
+            // Touch events
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleDpadStart(direction);
+            }, { passive: false });
             
-            for (let i = 0; i < e.touches.length; i++) {
-                if (e.touches[i].identifier === this.joystickTouchId) {
-                    e.preventDefault();
-                    handleJoystickMove(e.touches[i].clientX, e.touches[i].clientY);
-                    break;
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleDpadEnd(direction);
+            });
+            
+            btn.addEventListener('touchcancel', (e) => {
+                e.preventDefault();
+                handleDpadEnd(direction);
+            });
+            
+            // Mouse events pour desktop
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                handleDpadStart(direction);
+            });
+            
+            btn.addEventListener('mouseup', (e) => {
+                e.preventDefault();
+                handleDpadEnd(direction);
+            });
+            
+            btn.addEventListener('mouseleave', (e) => {
+                if (this.dpadState[direction]) {
+                    handleDpadEnd(direction);
                 }
-            }
-        }, { passive: false });
-        
-        document.addEventListener('touchend', (e) => {
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === this.joystickTouchId) {
-                    handleJoystickEnd(this.joystickTouchId);
-                    break;
-                }
-            }
-        });
-        
-        document.addEventListener('touchcancel', (e) => {
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === this.joystickTouchId) {
-                    handleJoystickEnd(this.joystickTouchId);
-                    break;
-                }
-            }
-        });
-        
-        // Mouse events pour desktop
-        joystickContainer.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            handleJoystickStart(e.clientX, e.clientY);
-        });
-        
-        document.addEventListener('mousemove', (e) => {
-            if (!this.joystickActive) return;
-            e.preventDefault();
-            handleJoystickMove(e.clientX, e.clientY);
-        });
-        
-        document.addEventListener('mouseup', (e) => {
-            if (this.joystickActive) {
-                handleJoystickEnd();
-            }
+            });
         });
         
         // Bouton de tir
@@ -1464,34 +1437,6 @@ const Game = {
         });
         
         fireBtn.addEventListener('mouseleave', handleFireEnd);
-    },
-
-    updateJoystickPosition(clientX, clientY) {
-        const joystickThumb = document.getElementById('joystick-thumb');
-        
-        // Recalculer l'origine à chaque mise à jour
-        this.calculateJoystickOrigin();
-        
-        let deltaX = clientX - this.joystickOrigin.x;
-        let deltaY = clientY - this.joystickOrigin.y;
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        
-        if (distance > this.joystickMaxRadius) {
-            deltaX = (deltaX / distance) * this.joystickMaxRadius;
-            deltaY = (deltaY / distance) * this.joystickMaxRadius;
-        }
-        
-        // Appliquer une zone morte pour éviter les mouvements involontaires
-        if (distance < this.joystickMaxRadius * CFG.JOYSTICK_DEADZONE) {
-            deltaX = 0;
-            deltaY = 0;
-        }
-        
-        joystickThumb.style.transform = `translate(calc(-50% + ${deltaX}px), calc(-50% + ${deltaY}px))`;
-        
-        // Normaliser les valeurs entre -1 et 1
-        this.joystickX = deltaX / this.joystickMaxRadius;
-        this.joystickY = deltaY / this.joystickMaxRadius;
     },
 
     togglePause() {
@@ -1539,15 +1484,12 @@ const Game = {
         this.combo = 0;
         this.maxCombo = 0;
         
-        // Réinitialiser le joystick
-        this.joystickActive = false;
-        this.joystickX = 0;
-        this.joystickY = 0;
-        const joystickThumb = document.getElementById('joystick-thumb');
-        if (joystickThumb) {
-            joystickThumb.style.transform = 'translate(-50%, -50%)';
-            joystickThumb.classList.remove('active');
-        }
+        // Réinitialiser les états du D-pad
+        this.dpadState = { up: false, down: false, left: false, right: false };
+        
+        // Retirer les classes active des boutons
+        document.querySelectorAll('.dpad-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('btn-fire').classList.remove('active');
         
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
@@ -1919,12 +1861,6 @@ const Game = {
         
         if (this.fireCooldown > 0) {
             this.fireCooldown -= 1;
-        }
-        
-        // Mise à jour du joystick
-        if (!this.joystickActive) {
-            this.joystickX = 0;
-            this.joystickY = 0;
         }
         
         // Contrôles clavier
@@ -2301,12 +2237,11 @@ class Player {
         if(Game.keys['ArrowUp'] || Game.keys['KeyW']) this.vy -= CFG.SPEED * 0.2;
         if(Game.keys['ArrowDown'] || Game.keys['KeyS']) this.vy += CFG.SPEED * 0.2;
         
-        // Contrôles joystick
-        if (Game.joystickActive) {
-            const sensitivity = 0.4;
-            this.vx += Game.joystickX * CFG.SPEED * sensitivity;
-            this.vy += Game.joystickY * CFG.SPEED * sensitivity;
-        }
+        // Contrôles D-pad
+        if (Game.dpadState.left) this.vx -= CFG.SPEED * 0.2;
+        if (Game.dpadState.right) this.vx += CFG.SPEED * 0.2;
+        if (Game.dpadState.up) this.vy -= CFG.SPEED * 0.2;
+        if (Game.dpadState.down) this.vy += CFG.SPEED * 0.2;
         
         this.wingFlap += 0.2;
         this.engineGlow = (this.engineGlow + 0.1) % (Math.PI * 2);
